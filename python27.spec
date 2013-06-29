@@ -367,6 +367,7 @@ rm -f mainpkg.files tools.files
 %{__prefix}/lib/python2.7/lib-dynload/
 %{__prefix}/lib/python2.7/lib2to3/tests/data/
 %{__prefix}/lib/pkgconfig/python-2.7.pc
+/usr/share/man/man1/python2.7.1.gz
 
 %attr(755,root,root) %dir %{__prefix}/include/python%{libvers}
 %attr(755,root,root) %dir %{__prefix}/lib/python%{libvers}/
