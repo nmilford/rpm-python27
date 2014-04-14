@@ -105,7 +105,7 @@ BuildRequires: gcc make expat-devel db4-devel gdbm-devel sqlite-devel readline-d
 AutoReq: no
 Prefix: %{__prefix}
 Vendor: Sean Reifschneider <jafo-rpms@tummy.com>
-Packager: cornfeedhobo <cornfeedhobo@fuzzlabs.org>
+Packager: Nathan Milford <nathan@milford.io>
 
 %description
 Python is an interpreted, interactive, object-oriented programming
