@@ -3,92 +3,109 @@
 # sudo yum -y install rpmdevtools && rpmdev-setuptree
 # sudo yum -y install tk-devel tcl-devel expat-devel db4-devel gdbm-devel sqlite-devel bzip2-devel openssl-devel ncurses-devel readline-devel
 # wget https://raw.github.com/nmilford/rpm-python27/master/python27.spec -O ~/rpmbuild/SPECS/python27.spec
-# wget http://www.python.org/ftp/python/2.7.5/Python-2.7.5.tar.bz2 -O ~/rpmbuild/SOURCES/Python-2.7.5.tar.bz2
+# wget http://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz -O ~/rpmbuild/SOURCES/Python-2.7.5.tgz
 # QA_RPATHS=$[ 0x0001|0x0010 ] rpmbuild -bb ~/rpmbuild/SPECS/python27.spec
 
 
 ##########################
 #  User-modifiable configs
 ##########################
+## WARNING:
+##  Commenting out doesn't work
+##  Last line is what's used.
 
-#  Is the resulting package and the installed binary named "python" or
-#  "python2"?
-#WARNING: Commenting out doesn't work.  Last line is what's used.
-#%define config_binsuffix none
-%define config_binsuffix 2.7
+#  Define Constants
+%define name python27
+%define version 2.7.6
+%define libvers 2.7
+%define release 1
+%define __prefix /usr
+
 
 #  Build tkinter?  "auto" enables it if /usr/bin/wish exists.
-#WARNING: Commenting out doesn't work.  Last line is what's used.
-%define config_tkinter no
 %define config_tkinter yes
 %define config_tkinter auto
+%define config_tkinter no
 
-#  Use pymalloc?  The last line (commented or not) determines wether
-#  pymalloc is used.
-#WARNING: Commenting out doesn't work.  Last line is what's used.
+
+#  Include HTML documentation?
+%define config_include_docs yes
+%define config_include_docs no
+
+
+#  Include tools?
+%define config_include_tools no
+%define config_include_tools yes
+
+
+#  Enable IPV6?
+%define config_ipv6 yes
+%define config_ipv6 no
+
+
+#  Use pymalloc?
 %define config_pymalloc no
 %define config_pymalloc yes
 
-#  Enable IPV6?
-#WARNING: Commenting out doesn't work.  Last line is what's used.
-%define config_ipv6 no
-%define config_ipv6 yes
+
+#  Is the resulting package and the installed binary named "python" or "python2"?
+%define config_binsuffix none
+%define config_binsuffix 2.7
+
 
 #  Build shared libraries or .a library?
-#WARNING: Commenting out doesn't work.  Last line is what's used.
-#%define config_sharedlib yes
+%define config_sharedlib yes
 %define config_sharedlib no
 
-%define config_include_tools no
 
-%define config_include_docs no
+#  Location of the HTML directory to place tho documentation in?
+%define config_htmldir /var/www/html/python%{version}
 
-#  Location of the HTML directory.
-%define config_htmldir /var/www/html/python
 
 #################################
 #  End of user-modifiable configs
 #################################
 
-%define name python27
-#--start constants--
-%define version 2.7.5
-%define libvers 2.7
-#--end constants--
-%define release 1
-%define __prefix /usr
+#  detect if tkinter should be included
+%define include_tkinter %(if [ \\( "%{config_tkinter}" = auto -a -f /usr/bin/wish \\) -o "%{config_tkinter}" = yes ]; then echo 1; else echo 0; fi)
+
+#  detect if documentation is available
+%define include_docs %(if [ "%{config_include_docs}" = yes ]; then echo 1; else echo 0; fi)
+
+#  detect if tools should be included
+%define include_tools %(if [ "%{config_include_tools}" = yes ]; then echo 1; else echo 0; fi)
+
 
 #  kludge to get around rpm <percent>define weirdness
 %define ipv6 %(if [ "%{config_ipv6}" = yes ]; then echo --enable-ipv6; else echo --disable-ipv6; fi)
 %define pymalloc %(if [ "%{config_pymalloc}" = yes ]; then echo --with-pymalloc; else echo --without-pymalloc; fi)
 %define binsuffix %(if [ "%{config_binsuffix}" = none ]; then echo ; else echo "%{config_binsuffix}"; fi)
-%define include_tkinter %(if [ \\( "%{config_tkinter}" = auto -a -f /usr/bin/wish \\) -o "%{config_tkinter}" = yes ]; then echo 1; else echo 0; fi)
 %define libdirname lib
-
 %define sharedlib %(if [ "%{config_sharedlib}" = yes ]; then echo --enable-shared; else echo ; fi)
 %define include_sharedlib %(if [ "%{config_sharedlib}" = yes ]; then echo 1; else echo 0; fi)
 
-%define include_tools %(if [ "%{config_include_tools}" = yes ]; then echo 1; else echo 0; fi)
 
-#  detect if documentation is available
-%define include_docs 0
-
+##############
+#  PREAMBLE  #
+##############
 Summary: An interpreted, interactive, object-oriented programming language.
-Name: python27
+Name: %{name}
 Version: %{version}
 Release: %{release}
 License: PSF
 Group: Development/Languages
-Source: Python-%{version}.tar.bz2
+Provides: python-abi = %{libvers}
+Provides: python(abi) = %{libvers}
+Source: https://www.python.org/ftp/python/%{version}/Python-%{version}.tgz
 %if %{include_docs}
-Source1: %{name}-%{version}-docs-html.tar.bz2
+Source1: https://docs.python.org/2/archives/python-%{version}-docs-html.tar.bz2
 %endif
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: gcc make expat-devel db4-devel gdbm-devel sqlite-devel readline-devel zlib-devel bzip2-devel openssl-devel
 AutoReq: no
 Prefix: %{__prefix}
 Vendor: Sean Reifschneider <jafo-rpms@tummy.com>
-Packager: Nathan Milford <nathan@milford.io>
+Packager: cornfeedhobo <cornfeedhobo@fuzzlabs.org>
 
 %description
 Python is an interpreted, interactive, object-oriented programming
@@ -158,6 +175,10 @@ formats.
 %endif
 
 %changelog
+* Mon Apr 14 2014 Cornfeedhobo <cornfeedhobo@fuzzlabs.org> [2.7.6-1]
+- Updated to 2.7.6
+- Fixed abi dependancy notice
+
 * Fri Jun 28 2012 Nathan Milford <nathan@milford.io> [2.7.5-1]
 - Updated to 2.7.5.
 
@@ -243,11 +264,13 @@ formats.
 - Updated to 2.2a1 release.
 - Changed idle and pydoc to use binsuffix macro
 
+
 #######
 #  PREP
 #######
 %prep
 %setup -n Python-%{version}
+
 
 ########
 #  BUILD
@@ -262,6 +285,7 @@ echo "Setting for sharedlib: %{sharedlib}"
 echo "Setting for include_sharedlib: %{include_sharedlib}"
 ./configure --enable-unicode=ucs4 --with-signal-module --with-threads %{sharedlib} %{ipv6} %{pymalloc} --prefix=%{__prefix}
 make %{_smp_mflags}
+
 
 ##########
 #  INSTALL
@@ -308,13 +332,13 @@ cp -a Tools $RPM_BUILD_ROOT%{__prefix}/%{libdirname}/python%{libvers}
 #  MAKE FILE LISTS
 rm -f mainpkg.files
 find "$RPM_BUILD_ROOT""%{__prefix}"/%{libdirname}/python%{libvers} -type f |
-	sed "s|^${RPM_BUILD_ROOT}|/|" | grep -v -e '_tkinter.so$' >mainpkg.files
+        sed "s|^${RPM_BUILD_ROOT}|/|" | grep -v -e '_tkinter.so$' >mainpkg.files
 find "$RPM_BUILD_ROOT""%{__prefix}"/bin -type f -o -type l |
-	sed "s|^${RPM_BUILD_ROOT}|/|" |
-	grep -v -e '/bin/2to3%{binsuffix}$' |
-	grep -v -e '/bin/pydoc%{binsuffix}$' |
-	grep -v -e '/bin/smtpd.py%{binsuffix}$' |
-	grep -v -e '/bin/idle%{binsuffix}$' >>mainpkg.files
+        sed "s|^${RPM_BUILD_ROOT}|/|" |
+        grep -v -e '/bin/2to3%{binsuffix}$' |
+        grep -v -e '/bin/pydoc%{binsuffix}$' |
+        grep -v -e '/bin/smtpd.py%{binsuffix}$' |
+        grep -v -e '/bin/idle%{binsuffix}$' >>mainpkg.files
 echo %{__prefix}/include/python%{libvers}/pyconfig.h >> mainpkg.files
 
 %if %{include_tools}
@@ -337,7 +361,8 @@ mkdir -p "$RPM_BUILD_ROOT"%{config_htmldir}
 )
 %endif
 
-#  fix the #! line in installed files
+######
+# Fix the #! line in installed files
 find "$RPM_BUILD_ROOT" -type f -print0 |
       xargs -0 grep -l /usr/local/bin/python | while read file
 do
@@ -348,12 +373,14 @@ do
    rm -f /tmp/fix-python-path.$$
 done
 
+
 ########
 #  CLEAN
 ########
 %clean
 [ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
 rm -f mainpkg.files tools.files
+
 
 ########
 #  FILES
@@ -363,14 +390,12 @@ rm -f mainpkg.files tools.files
 %doc Misc/README Misc/cheatsheet Misc/Porting
 %doc LICENSE Misc/ACKS Misc/HISTORY Misc/NEWS
 
-# OMG I'm a Lazy hack.
-%{__prefix}/lib/python2.7/lib-dynload/
-%{__prefix}/lib/python2.7/lib2to3/tests/data/
-%{__prefix}/lib/pkgconfig/python-2.7.pc
-/usr/share/man/man1/python2.7.1.gz
+%{__prefix}/%{libdirname}/python%{libvers}/lib-dynload/
+%{__prefix}/%{libdirname}/python%{libvers}/lib2to3/tests/data/
+%{__prefix}/%{libdirname}/pkgconfig/python-%{libvers}.pc
 
 %attr(755,root,root) %dir %{__prefix}/include/python%{libvers}
-%attr(755,root,root) %dir %{__prefix}/lib/python%{libvers}/
+%attr(755,root,root) %dir %{__prefix}/%{libdirname}/python%{libvers}/
 %attr(755,root,root) %dir %{__prefix}/%{libdirname}/python%{libvers}/
 
 %if %{include_sharedlib}
