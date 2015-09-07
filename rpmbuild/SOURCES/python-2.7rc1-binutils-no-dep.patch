@@ -1,0 +1,14 @@
+diff -up Python-2.7rc1/Lib/ctypes/util.py.binutils-no-dep Python-2.7rc1/Lib/ctypes/util.py
+--- Python-2.7rc1/Lib/ctypes/util.py.binutils-no-dep	2010-03-15 09:42:23.000000000 -0400
++++ Python-2.7rc1/Lib/ctypes/util.py	2010-06-06 05:03:02.155975210 -0400
+@@ -140,7 +140,9 @@ elif os.name == "posix":
+             dump = f.read()
+             rv = f.close()
+             if rv == 10:
+-                raise OSError, 'objdump command not found'
++                return os.path.basename(f) #  This is good for GLibc, I think,
++                                           # and a dep on binutils is big (for
++                                           # live CDs).
+             f = os.popen(cmd)
+             try:
+                 data = f.read()

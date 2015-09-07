@@ -1,0 +1,14 @@
+--- Python-2.7.2/Lib/test/test_sys.py.mark-tests-that-fail-in-rpmbuild	2011-09-08 18:02:31.627362039 -0400
++++ Python-2.7.2/Lib/test/test_sys.py	2011-09-08 18:15:29.450308851 -0400
+@@ -734,6 +734,11 @@ class SizeofTest(unittest.TestCase):
+         # (PyTypeObject + PyNumberMethods +  PyMappingMethods +
+         #  PySequenceMethods + PyBufferProcs)
+         s = vsize('P2P15Pl4PP9PP11PI') + struct.calcsize('41P 10P 3P 6P')
++
++        # COUNT_ALLOCS adds further fields to the end of a PyTypeObject:
++        if hasattr(sys, 'getcounts'):
++            s += size('P')
++
+         class newstyleclass(object):
+             pass
+         check(newstyleclass, s)

@@ -1,0 +1,45 @@
+%py_setup setup.py
+%py_shbang_opts -s
+
+%py_build() %{expand:\
+CFLAGS="%{optflags}" %{__python} %{py_setup} %{?py_setup_args} build --executable="%{__python2} %{py_shbang_opts}" %{?1}\
+}
+
+%py_install() %{expand:\
+CFLAGS="%{optflags}" %{__python} %{py_setup} %{?py_setup_args} install -O1 --skip-build --root %{buildroot} %{?1}\
+}
+
+%python_provide() %{lua:\
+        function string.starts(String,Start)\
+                return string.sub(String,1,string.len(Start))==Start\
+        end\
+        str = rpm.expand("%{?1:%{1}}");\
+        vr = rpm.expand("%{?epoch:%{epoch}:}%{version}-%{release}")
+        if (string.starts(str, "python2-")) then\
+                print("Provides: python-");\
+                print(string.sub(str,9,string.len(str)));\
+                print(" = ");\
+                print(vr);\
+                --Obsoleting the previous default python package\
+                print("\\nObsoletes: python-");\
+                print(string.sub(str,9,string.len(str)));\
+                print(" < ");\
+                print(vr);\
+        elseif (string.starts(str, "python3-")) then\
+                --No unversioned provides as python3 is not default\
+        elseif (string.starts(str, "pypy-")) then\
+                --No unversioned provides as pypy is not default\
+        elseif (string.starts(str, "pypy3-")) then\
+                --No unversioned provides as pypy is not default\
+        elseif (string.starts(str, "python-")) then\
+                --Providing the current default python\
+                print("Provides: python2-");\
+                print(string.sub(str,8,string.len(str)));\
+                print(" = ");\
+                print(vr);\
+        else\
+                print("ERROR: ");\
+                print(str);\
+                print("not recognized.");\
+        end\
+}
