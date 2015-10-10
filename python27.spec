@@ -3,7 +3,7 @@
 # sudo yum -y install rpmdevtools && rpmdev-setuptree
 # sudo yum -y install tk-devel tcl-devel expat-devel db4-devel gdbm-devel sqlite-devel bzip2-devel openssl-devel ncurses-devel readline-devel
 # wget https://raw.github.com/nmilford/rpm-python27/master/python27.spec -O ~/rpmbuild/SPECS/python27.spec
-# wget http://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz -O ~/rpmbuild/SOURCES/Python-2.7.6.tgz
+# wget https://www.python.org/ftp/python/2.7.10/Python-2.7.10.tgz -O ~/rpmbuild/SOURCES/Python-2.7.10.tgz
 # QA_RPATHS=$[ 0x0001|0x0010 ] rpmbuild -bb ~/rpmbuild/SPECS/python27.spec
 
 
@@ -16,7 +16,7 @@
 
 #  Define Constants
 %define name python27
-%define version 2.7.6
+%define version 2.7.10
 %define libvers 2.7
 %define release 1
 %define __prefix /usr
@@ -175,6 +175,9 @@ formats.
 %endif
 
 %changelog
+* Sat Sep 5 2015 thinker0 <thinker0@gmail.com> [2.7.10-1]
+- Updated to 2.7.10
+
 * Mon Apr 14 2014 Cornfeedhobo <cornfeedhobo@fuzzlabs.org> [2.7.6-1]
 - Updated to 2.7.6
 - Fixed abi dependancy notice
@@ -389,6 +392,7 @@ rm -f mainpkg.files tools.files
 %defattr(-,root,root)
 %doc Misc/README Misc/cheatsheet Misc/Porting
 %doc LICENSE Misc/ACKS Misc/HISTORY Misc/NEWS
+%doc %{__prefix}/share/man/man1/python2.7.1.gz
 
 %{__prefix}/%{libdirname}/python%{libvers}/lib-dynload/
 %{__prefix}/%{libdirname}/python%{libvers}/lib2to3/tests/data/
@@ -403,6 +407,7 @@ rm -f mainpkg.files tools.files
 %else
 %{__prefix}/%{libdirname}/libpython*.a
 %endif
+#%{__prefix}/share/man/man1/python2.7.1.gz
 
 %files devel
 %defattr(-,root,root)
