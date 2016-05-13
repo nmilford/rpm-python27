@@ -330,6 +330,8 @@ chmod 644 $RPM_BUILD_ROOT%{__prefix}/%{libdirname}/libpython%{libvers}*
 #  Tools
 %if %{include_tools}
 cp -a Tools $RPM_BUILD_ROOT%{__prefix}/%{libdirname}/python%{libvers}
+install -D -m 644 Tools/gdb/libpython.py $RPM_BUILD_ROOT%{__prefix}/%{libdirname}/debug/usr/bin/python%{libvers}.debug-gdb.py
+echo "/usr/lib/debug/usr/bin/python2.7.debug-gdb.py" >> debugfiles.list
 %endif
 
 #  MAKE FILE LISTS
